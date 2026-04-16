@@ -9,7 +9,7 @@ from texture_feature import extract_texture_feature
 
 
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff", ".webp"}
-EXCLUDED_CATEGORIES = {"human_being"}
+EXCLUDED_CATEGORIES = {"human_being", "fire_extinguisher"}
 
 
 def list_images(dataset_dir, excluded_categories=None):

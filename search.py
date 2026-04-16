@@ -2,7 +2,7 @@ import numpy as np
 
 from feature_database import extract_feature_parts, load_feature_database
 
-EXCLUDED_LABELS = {"human_being"}
+EXCLUDED_LABELS = {"human_being", "fire_extinguisher"}
 
 
 def _validate_top_k(top_k, total_items):
