@@ -3,7 +3,12 @@ from pathlib import Path
 from flask import Flask, flash, redirect, render_template, request, send_file, url_for
 from werkzeug.utils import secure_filename
 
-from feature_database import build_feature_database, load_feature_database, list_images
+from feature_database import (
+    EXCLUDED_CATEGORIES,
+    build_feature_database,
+    load_feature_database,
+    list_images,
+)
 from search import search_images
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -23,7 +28,15 @@ def is_allowed_file(filename: str) -> bool:
 
 
 def get_available_categories():
-    labels = sorted({path.parent.name for path in list_images(str(DATASET_DIR))})
+    labels = sorted(
+        {
+            path.parent.name
+            for path in list_images(
+                str(DATASET_DIR),
+                excluded_categories=EXCLUDED_CATEGORIES,
+            )
+        }
+    )
     return labels
 
 
@@ -37,6 +50,9 @@ def ensure_feature_database() -> None:
                 database[key] is None
                 for key in ("color_features", "texture_features", "shape_features")
             )
+            if not needs_rebuild:
+                labels = [str(label).strip().lower() for label in database["labels"]]
+                needs_rebuild = any(label in EXCLUDED_CATEGORIES for label in labels)
         except Exception:
             needs_rebuild = True
 

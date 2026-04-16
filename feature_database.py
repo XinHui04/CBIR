@@ -9,17 +9,28 @@ from texture_feature import extract_texture_feature
 
 
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff", ".webp"}
+EXCLUDED_CATEGORIES = {"human_being"}
 
 
-def list_images(dataset_dir):
+def list_images(dataset_dir, excluded_categories=None):
     dataset_path = Path(dataset_dir)
     if not dataset_path.exists() or not dataset_path.is_dir():
         raise FileNotFoundError(f"Dataset directory not found: {dataset_dir}")
 
+    normalized_excluded = {
+        name.strip().lower() for name in (excluded_categories or set()) if name.strip()
+    }
+
     image_paths = []
     for path in dataset_path.rglob("*"):
-        if path.is_file() and path.suffix.lower() in IMAGE_EXTENSIONS:
-            image_paths.append(path)
+        if not path.is_file() or path.suffix.lower() not in IMAGE_EXTENSIONS:
+            continue
+
+        # Skip excluded class folders (for example, human_being).
+        if path.parent.name.strip().lower() in normalized_excluded:
+            continue
+
+        image_paths.append(path)
 
     image_paths.sort()
     return image_paths
@@ -99,7 +110,7 @@ def build_feature_database(
     if not (use_color or use_texture or use_shape):
         raise ValueError("At least one feature must be selected")
 
-    image_paths = list_images(dataset_dir)
+    image_paths = list_images(dataset_dir, excluded_categories=EXCLUDED_CATEGORIES)
     if not image_paths:
         raise ValueError(f"No images found in dataset directory: {dataset_dir}")
 

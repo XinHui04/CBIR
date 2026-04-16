@@ -2,6 +2,8 @@ import numpy as np
 
 from feature_database import extract_feature_parts, load_feature_database
 
+EXCLUDED_LABELS = {"human_being"}
+
 
 def _validate_top_k(top_k, total_items):
     if top_k <= 0:
@@ -54,6 +56,15 @@ def _build_query_feature(query_image_path, size, color_bins, use_color, use_text
 
 
 def _apply_category_filter(features, image_paths, labels, category):
+    normalized_labels = np.array([str(label).strip().lower() for label in labels], dtype=object)
+    exclusion_mask = ~np.isin(normalized_labels, list(EXCLUDED_LABELS))
+    features = features[exclusion_mask]
+    image_paths = image_paths[exclusion_mask]
+    labels = labels[exclusion_mask]
+
+    if len(labels) == 0:
+        raise ValueError("No searchable images available after category exclusion")
+
     if not category:
         return features, image_paths, labels
 
