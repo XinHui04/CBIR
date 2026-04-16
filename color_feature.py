@@ -5,7 +5,6 @@ from preprocess import preprocess_image
 
 
 def extract_hsv_histogram(image, bins=(8, 8, 8), normalize=True, use_mask=True):
-    """Extract a flattened HSV color histogram feature vector."""
 
     if image is None:
         raise ValueError("Input image is None")
@@ -19,31 +18,36 @@ def extract_hsv_histogram(image, bins=(8, 8, 8), normalize=True, use_mask=True):
     # ✅ Convert to HSV
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
-    # 🚀 NEW: Background Masking (important for your dataset)
     mask = None
     if use_mask:
+        # ✅ Better masking (combine HSV + grayscale idea)
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-        # simple threshold to remove bright background
-        _, mask = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY_INV)
+        # remove bright background
+        _, mask1 = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY_INV)
 
-    # ✅ Compute histogram
+        # remove low-saturation areas (background)
+        lower = np.array([0, 30, 30])
+        upper = np.array([180, 255, 255])
+        mask2 = cv2.inRange(hsv, lower, upper)
+
+        # combine masks
+        mask = cv2.bitwise_and(mask1, mask2)
+
     hist = cv2.calcHist(
         [hsv],
-        channels=[0, 1, 2],
-        mask=mask,
-        histSize=[bins[0], bins[1], bins[2]],
-        ranges=[0, 180, 0, 256, 0, 256],
+        [0, 1, 2],
+        mask,
+        bins,
+        [0, 180, 0, 256, 0, 256]
     )
 
-    # ✅ Normalize using OpenCV (better stability)
     if normalize:
         hist = cv2.normalize(hist, hist).flatten()
     else:
         hist = hist.flatten()
 
     return hist.astype(np.float32)
-
 
 def extract_color_feature(image_path, size=(256, 256), bins=(8, 8, 8), normalize=True):
     """Load an image and extract its HSV histogram feature vector."""
