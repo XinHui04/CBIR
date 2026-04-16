@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digital Curator | Soft Decor Analysis</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-secondary-fixed-variant": "#38485d",
+            "error-container": "#ffdad6",
+            "primary-fixed": "#dbe1ff",
+            "tertiary-fixed": "#c9e6ff",
+            "tertiary-container": "#0074a6",
+            "on-tertiary": "#ffffff",
+            "tertiary": "#005a82",
+            "on-primary": "#ffffff",
+            "surface-container": "#eceef0",
+            "outline": "#737686",
+            "error": "#ba1a1a",
+            "surface-variant": "#e0e3e5",
+            "on-secondary-fixed": "#0b1c30",
+            "tertiary-fixed-dim": "#89ceff",
+            "surface-container-low": "#f2f4f6",
+            "outline-variant": "#c3c6d7",
+            "secondary-fixed": "#d3e4fe",
+            "on-tertiary-fixed-variant": "#004c6e",
+            "on-error-container": "#93000a",
+            "surface": "#f7f9fb",
+            "surface-tint": "#0053db",
+            "on-error": "#ffffff",
+            "on-tertiary-container": "#e4f2ff",
+            "surface-dim": "#d8dadc",
+            "on-tertiary-fixed": "#001e2f",
+            "inverse-on-surface": "#eff1f3",
+            "secondary-container": "#d0e1fb",
+            "on-surface-variant": "#434655",
+            "surface-container-lowest": "#ffffff",
+            "on-secondary-container": "#54647a",
+            "inverse-primary": "#b4c5ff",
+            "primary": "#004ac6",
+            "secondary": "#505f76",
+            "primary-container": "#2563eb",
+            "surface-bright": "#f7f9fb",
+            "on-primary-container": "#eeefff",
+            "inverse-surface": "#2d3133",
+            "surface-container-high": "#e6e8ea",
+            "on-background": "#191c1e",
+            "on-surface": "#191c1e",
+            "secondary-fixed-dim": "#b7c8e1",
+            "surface-container-highest": "#e0e3e5",
+            "primary-fixed-dim": "#b4c5ff",
+            "on-primary-fixed": "#00174b",
+            "on-primary-fixed-variant": "#003ea8",
+            "background": "#f7f9fb",
+            "on-secondary": "#ffffff"
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f7f9fb;
+      color: #191c1e;
+    }
+    .font-manrope { font-family: 'Manrope', sans-serif; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="overflow-hidden">
+  <header class="flex justify-between items-center px-6 py-4 w-full bg-[#f7f9fb] fixed top-0 z-50 border-b border-surface-container-low">
+    <div class="flex items-center gap-3">
+      <span class="text-xl font-bold tracking-tight text-[#191c1e] font-manrope">Digital Curator</span>
+      <div class="h-4 w-[1px] bg-outline-variant opacity-20 mx-2"></div>
+      <span class="text-on-surface-variant text-sm font-medium">Studio Workspace</span>
+    </div>
+    <div class="flex items-center gap-4">
+      <button class="p-2 text-on-surface hover:bg-slate-100 transition-colors rounded-full" type="button">
+        <span class="material-symbols-outlined">settings</span>
+      </button>
+      <button class="flex items-center gap-2 pl-2 pr-1 py-1 rounded-full bg-surface-container-low hover:bg-surface-container-high transition-colors" type="button">
+        <span class="text-xs font-semibold px-2">Pro User</span>
+        <span class="material-symbols-outlined text-primary">account_circle</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="flex h-screen pt-16">
+    <aside class="fixed left-0 h-full flex flex-col p-4 w-72 bg-[#ffffff] opacity-95 backdrop-blur-xl shadow-xl shadow-slate-200/50 z-40 overflow-y-auto no-scrollbar">
+      <form id="search-form" method="post" action="/" enctype="multipart/form-data" class="space-y-6">
+        <div>
+          <label class="w-full aspect-[4/3] rounded-xl bg-surface-container-low border-2 border-dashed border-outline-variant flex flex-col items-center justify-center p-6 text-center group cursor-pointer hover:bg-surface-container transition-all" for="query_image">
+            <span class="material-symbols-outlined text-4xl text-outline mb-2 group-hover:scale-110 transition-transform">add_a_photo</span>
+            <p class="text-sm font-semibold text-on-surface">Upload Room Photo</p>
+            <p class="text-[11px] text-on-surface-variant mt-1 uppercase tracking-tighter">JPG, PNG up to 10MB</p>
+          </label>
+          <input class="hidden" id="query_image" name="query_image" accept=".jpg,.jpeg,.png,.bmp,.tif,.tiff,.webp" type="file" required />
+          <div id="selected-file-wrap" class="mt-3 hidden">
+            <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 px-2 mb-2">Selected Image</p>
+            <img id="selected-file-preview" class="w-full aspect-[4/3] object-cover rounded-xl border border-surface-container bg-surface-container-low" alt="Selected preview" />
+            <p id="selected-file-name" class="mt-2 text-xs text-on-surface-variant px-2 truncate"></p>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <h3 class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 px-2">Search Options</h3>
+          <div>
+            <label class="text-xs text-slate-500 px-2">Category</label>
+            <select name="category" class="mt-1 w-full rounded-xl border-outline-variant bg-surface-container-low">
+              <option value="all" {% if selected_category == 'all' %}selected{% endif %}>All Categories</option>
+              {% for category in available_categories %}
+                <option value="{{ category }}" {% if selected_category == category %}selected{% endif %}>{{ category }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label class="text-xs text-slate-500 px-2">Metric</label>
+            <select name="metric" class="mt-1 w-full rounded-xl border-outline-variant bg-surface-container-low">
+              <option value="cosine" {% if selected_metric == 'cosine' %}selected{% endif %}>Cosine Similarity</option>
+              <option value="euclidean" {% if selected_metric == 'euclidean' %}selected{% endif %}>Euclidean Distance</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs text-slate-500 px-2">Top-K Results</label>
+            <input name="top_k" min="1" max="24" type="number" value="{{ selected_top_k }}" class="mt-1 w-full rounded-xl border-outline-variant bg-surface-container-low" />
+          </div>
+          <div>
+            <p class="text-xs text-slate-500 px-2 mb-2">Feature Types</p>
+            <div class="space-y-2 rounded-xl bg-surface-container-low p-3">
+              <label class="flex items-center justify-between gap-3 text-sm text-on-surface">
+                <span>Color</span>
+                <input name="use_color" type="checkbox" class="rounded border-outline-variant text-primary" {% if selected_features.color %}checked{% endif %} />
+              </label>
+              <label class="flex items-center justify-between gap-3 text-sm text-on-surface">
+                <span>Texture</span>
+                <input name="use_texture" type="checkbox" class="rounded border-outline-variant text-primary" {% if selected_features.texture %}checked{% endif %} />
+              </label>
+              <label class="flex items-center justify-between gap-3 text-sm text-on-surface">
+                <span>Shape Feature</span>
+                <input name="use_shape" type="checkbox" class="rounded border-outline-variant text-primary" {% if selected_features.shape %}checked{% endif %} />
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <button id="generate-button" class="w-full flex items-center justify-center gap-2 px-6 py-2 rounded-full bg-gradient-to-br from-primary to-primary-container text-white font-bold text-sm tracking-tight shadow-lg shadow-blue-500/20 hover:scale-[1.01] active:scale-95 transition-all" type="submit">
+          <span>Generate</span>
+          <span class="material-symbols-outlined text-lg">bolt</span>
+        </button>
+      </form>
+
+      <div class="mt-auto pt-6 border-t border-surface-container">
+        <div class="flex items-center gap-3 px-2 py-3 text-slate-600">
+          <span class="material-symbols-outlined">history</span>
+          <span class="text-[11px] font-semibold uppercase tracking-wider">History</span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="ml-72 flex-1 flex flex-col bg-surface relative overflow-hidden">
+      <div class="px-8 pt-6 pb-4 flex justify-between items-end border-b border-surface-container-low bg-surface/80 backdrop-blur-md z-30">
+        <div class="flex gap-8">
+          <button class="pb-3 border-b-2 border-primary text-primary font-bold text-sm tracking-tight" type="button">Results</button>
+        </div>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-8 no-scrollbar pb-32 space-y-6">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="rounded-xl p-4 bg-error-container text-on-error-container text-sm font-medium">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        {% if query_image_url %}
+          <section class="bg-surface-container-lowest p-4 rounded-xl shadow-sm">
+            <h3 class="text-sm font-semibold text-on-surface mb-3">Query Image</h3>
+            <img src="{{ query_image_url }}" alt="Query" class="w-56 h-56 object-cover rounded-lg border border-surface-container" />
+            <div class="mt-4 flex flex-wrap gap-2 text-xs">
+              <span class="rounded-full bg-surface-container px-3 py-1 text-on-surface-variant">Category: {{ selected_category }}</span>
+              <span class="rounded-full bg-surface-container px-3 py-1 text-on-surface-variant">Metric: {{ selected_metric }}</span>
+              {% if selected_features.color %}
+                <span class="rounded-full bg-surface-container px-3 py-1 text-on-surface-variant">Color</span>
+              {% endif %}
+              {% if selected_features.texture %}
+                <span class="rounded-full bg-surface-container px-3 py-1 text-on-surface-variant">Texture</span>
+              {% endif %}
+              {% if selected_features.shape %}
+                <span class="rounded-full bg-surface-container px-3 py-1 text-on-surface-variant">Shape</span>
+              {% endif %}
+            </div>
+          </section>
+        {% endif %}
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {% for item in results %}
+            <div class="group bg-surface-container-lowest p-3 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 flex flex-col">
+              <div class="relative overflow-hidden rounded-lg aspect-square mb-4 bg-surface-container-low flex items-center justify-center">
+                {% if item.image_url %}
+                  <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="{{ item.image_url }}" alt="{{ item.label }}" />
+                {% else %}
+                  <span class="material-symbols-outlined text-4xl text-outline-variant">image</span>
+                {% endif %}
+                <span class="absolute top-2 left-2 bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{{ item.rank }}</span>
+              </div>
+              <h4 class="text-sm font-bold text-on-surface mb-1">{{ item.label }}</h4>
+              {% if item.is_cosine %}
+                <p class="text-[12px] text-on-surface-variant leading-relaxed">Cosine similarity: {{ '%.6f'|format(item.score) }}</p>
+              {% else %}
+                <p class="text-[12px] text-on-surface-variant leading-relaxed">Euclidean distance: {{ '%.6f'|format(item.score) }}</p>
+              {% endif %}
+            </div>
+          {% endfor %}
+
+          {% if not results %}
+            <div class="col-span-full rounded-xl border border-dashed border-outline-variant p-10 text-center bg-surface-container-lowest">
+              <span class="material-symbols-outlined text-4xl text-outline-variant">search</span>
+              <p class="mt-3 text-sm font-semibold text-on-surface">Upload an image and click Generate to view matches</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
+
+<script>
+const searchForm = document.getElementById("search-form");
+const uploadInput = document.getElementById("query_image");
+const selectedFileWrap = document.getElementById("selected-file-wrap");
+const selectedFilePreview = document.getElementById("selected-file-preview");
+const selectedFileName = document.getElementById("selected-file-name");
+const generateButton = document.getElementById("generate-button");
+
+uploadInput.addEventListener("change", () => {
+  const selectedFile = uploadInput.files && uploadInput.files[0];
+
+  if (!selectedFile) {
+    selectedFileWrap.classList.add("hidden");
+    selectedFilePreview.removeAttribute("src");
+    selectedFileName.textContent = "";
+    return;
+  }
+
+  const objectUrl = URL.createObjectURL(selectedFile);
+  selectedFilePreview.src = objectUrl;
+  selectedFileName.textContent = selectedFile.name;
+  selectedFileWrap.classList.remove("hidden");
+});
+
+searchForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const selectedFile = uploadInput.files && uploadInput.files[0];
+  if (!selectedFile) {
+    alert("Please upload an image first");
+    return;
+  }
+
+  generateButton.disabled = true;
+
+  searchForm.submit();
+});
+</script>
