@@ -1,6 +1,8 @@
 # CBIR - Content-Based Image Retrieval
 
 A Flask-based content-based image retrieval (CBIR) project for a nursing-home object dataset. The system extracts image features from a query photo and returns the most similar images from the dataset using either cosine similarity or Euclidean distance.
+## Dataset used
+https://data.mendeley.com/datasets/fpctx3svzd/1
 
 ## Features
 
