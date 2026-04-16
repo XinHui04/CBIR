@@ -1,0 +1,6 @@
+Dataset/
+uploads/
+__pycache__/
+*.pyc
+feature_database.npz
+tmp_feature_db.npz
