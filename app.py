@@ -5,8 +5,10 @@ from werkzeug.utils import secure_filename
 
 from feature_database import (
     EXCLUDED_CATEGORIES,
+    METADATA_FILENAME,
     build_feature_database,
     load_feature_database,
+    load_dataset_metadata,
     list_images,
 )
 from search import search_images
@@ -40,6 +42,10 @@ def get_available_categories():
     return labels
 
 
+def has_metadata_file():
+    return bool(load_dataset_metadata(str(DATASET_DIR)))
+
+
 def ensure_feature_database() -> None:
     needs_rebuild = not DB_PATH.exists()
 
@@ -53,6 +59,9 @@ def ensure_feature_database() -> None:
             if not needs_rebuild:
                 labels = [str(label).strip().lower() for label in database["labels"]]
                 needs_rebuild = any(label in EXCLUDED_CATEGORIES for label in labels)
+                metadata_available = has_metadata_file()
+                if metadata_available != database["has_complete_metadata"]:
+                    needs_rebuild = True
         except Exception:
             needs_rebuild = True
 
@@ -99,16 +108,25 @@ def index():
     selected_metric = "cosine"
     selected_top_k = 8
     selected_category = "all"
+    selected_retrieval_mode = "similarity"
     selected_features = {
         "color": True,
         "texture": True,
         "shape": True,
     }
     available_categories = get_available_categories()
+    metadata_available = has_metadata_file()
 
     if request.method == "POST":
         selected_metric = request.form.get("metric", "cosine").strip().lower()
         selected_category = request.form.get("category", "all").strip()
+        selected_retrieval_mode = request.form.get("retrieval_mode", "similarity").strip().lower()
+
+        if selected_retrieval_mode == "canonical_front" and not metadata_available:
+            flash(
+                f"Canonical front-view mode is unavailable because Dataset/{METADATA_FILENAME} was not found. Falling back to similarity mode."
+            )
+            selected_retrieval_mode = "similarity"
 
         try:
             selected_top_k = int(request.form.get("top_k", 8))
@@ -151,6 +169,7 @@ def index():
                 use_color=selected_features["color"],
                 use_texture=selected_features["texture"],
                 use_shape=selected_features["shape"],
+                retrieval_mode=selected_retrieval_mode,
             )
 
             for rank, item in enumerate(raw_results, start=1):
@@ -162,6 +181,9 @@ def index():
                         "image_url": build_image_url(item["image_path"]),
                         "score": score,
                         "is_cosine": "cosine_similarity" in item,
+                        "instance_id": item.get("instance_id", ""),
+                        "view_label": item.get("view_label", ""),
+                        "matched_instance_id": item.get("matched_instance_id", ""),
                     }
                 )
         except Exception as exc:
@@ -174,8 +196,11 @@ def index():
         selected_metric=selected_metric,
         selected_top_k=selected_top_k,
         selected_category=selected_category,
+        selected_retrieval_mode=selected_retrieval_mode,
         selected_features=selected_features,
         available_categories=available_categories,
+        metadata_available=metadata_available,
+        metadata_filename=METADATA_FILENAME,
     )
 
 
