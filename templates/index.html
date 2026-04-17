@@ -133,20 +133,6 @@
             </select>
           </div>
           <div>
-            <label class="text-xs text-slate-500 px-2">Retrieval Mode</label>
-            <select name="retrieval_mode" class="mt-1 w-full rounded-xl border-outline-variant bg-surface-container-low">
-              <option value="similarity" {% if selected_retrieval_mode == 'similarity' %}selected{% endif %}>Find Similar Images</option>
-              <option value="canonical_front" {% if selected_retrieval_mode == 'canonical_front' %}selected{% endif %}>Return Front View</option>
-            </select>
-            <p class="mt-2 px-2 text-[11px] text-on-surface-variant">
-              {% if metadata_available %}
-                Front-view mode is enabled through `{{ metadata_filename }}` instance/view metadata.
-              {% else %}
-                Front-view mode needs `Dataset/{{ metadata_filename }}` with `image_path`, `instance_id`, and `view_label`.
-              {% endif %}
-            </p>
-          </div>
-          <div>
             <label class="text-xs text-slate-500 px-2">Top-K Results</label>
             <input name="top_k" min="1" max="24" type="number" value="{{ selected_top_k }}" class="mt-1 w-full rounded-xl border-outline-variant bg-surface-container-low" />
           </div>
@@ -206,7 +192,6 @@
             <div class="mt-4 flex flex-wrap gap-2 text-xs">
               <span class="rounded-full bg-surface-container px-3 py-1 text-on-surface-variant">Category: {{ selected_category }}</span>
               <span class="rounded-full bg-surface-container px-3 py-1 text-on-surface-variant">Metric: {{ selected_metric }}</span>
-              <span class="rounded-full bg-surface-container px-3 py-1 text-on-surface-variant">Mode: {{ selected_retrieval_mode }}</span>
               {% if selected_features.color %}
                 <span class="rounded-full bg-surface-container px-3 py-1 text-on-surface-variant">Color</span>
               {% endif %}
@@ -232,19 +217,10 @@
                 <span class="absolute top-2 left-2 bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{{ item.rank }}</span>
               </div>
               <h4 class="text-sm font-bold text-on-surface mb-1">{{ item.label }}</h4>
-              {% if item.instance_id %}
-                <p class="text-[12px] text-on-surface-variant leading-relaxed">Instance: {{ item.instance_id }}</p>
-              {% endif %}
-              {% if item.view_label %}
-                <p class="text-[12px] text-on-surface-variant leading-relaxed">View: {{ item.view_label }}</p>
-              {% endif %}
               {% if item.is_cosine %}
                 <p class="text-[12px] text-on-surface-variant leading-relaxed">Cosine similarity: {{ '%.6f'|format(item.score) }}</p>
               {% else %}
                 <p class="text-[12px] text-on-surface-variant leading-relaxed">Euclidean distance: {{ '%.6f'|format(item.score) }}</p>
-              {% endif %}
-              {% if item.matched_instance_id %}
-                <p class="text-[12px] text-on-surface-variant leading-relaxed">Matched instance: {{ item.matched_instance_id }}</p>
               {% endif %}
             </div>
           {% endfor %}
