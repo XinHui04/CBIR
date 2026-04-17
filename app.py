@@ -3,7 +3,12 @@ from pathlib import Path
 from flask import Flask, flash, redirect, render_template, request, send_file, url_for
 from werkzeug.utils import secure_filename
 
-from feature_database import build_feature_database, load_feature_database, list_images
+from feature_database import (
+    build_feature_database,
+    extract_feature_parts,
+    load_feature_database,
+    list_images,
+)
 from search import search_images
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -37,6 +42,20 @@ def ensure_feature_database() -> None:
                 database[key] is None
                 for key in ("color_features", "texture_features", "shape_features")
             )
+            if not needs_rebuild:
+                dataset_images = list_images(str(DATASET_DIR))
+                if dataset_images:
+                    sample_parts = extract_feature_parts(str(dataset_images[0]))
+                    expected_dims = {
+                        "color_features": sample_parts["color"].shape[0],
+                        "texture_features": sample_parts["texture"].shape[0],
+                        "shape_features": sample_parts["shape"].shape[0],
+                    }
+                    for key, expected_dim in expected_dims.items():
+                        current = database[key]
+                        if current is None or current.ndim != 2 or current.shape[1] != expected_dim:
+                            needs_rebuild = True
+                            break
         except Exception:
             needs_rebuild = True
 
