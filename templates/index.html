@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Digital Curator | Soft Decor Analysis</title>
+  <title>Content-Based Image Retrieval</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
@@ -82,16 +82,16 @@
 <body class="overflow-hidden">
   <header class="flex justify-between items-center px-6 py-4 w-full bg-[#f7f9fb] fixed top-0 z-50 border-b border-surface-container-low">
     <div class="flex items-center gap-3">
-      <span class="text-xl font-bold tracking-tight text-[#191c1e] font-manrope">Digital Curator</span>
+      <span class="text-xl font-bold tracking-tight text-[#191c1e] font-manrope">CBIR</span>
       <div class="h-4 w-[1px] bg-outline-variant opacity-20 mx-2"></div>
-      <span class="text-on-surface-variant text-sm font-medium">Studio Workspace</span>
+      <span class="text-on-surface-variant text-sm font-medium">Furniture Searching</span>
     </div>
     <div class="flex items-center gap-4">
       <button class="p-2 text-on-surface hover:bg-slate-100 transition-colors rounded-full" type="button">
         <span class="material-symbols-outlined">settings</span>
       </button>
       <button class="flex items-center gap-2 pl-2 pr-1 py-1 rounded-full bg-surface-container-low hover:bg-surface-container-high transition-colors" type="button">
-        <span class="text-xs font-semibold px-2">Pro User</span>
+        <span class="text-xs font-semibold px-2">User</span>
         <span class="material-symbols-outlined text-primary">account_circle</span>
       </button>
     </div>
@@ -103,7 +103,7 @@
         <div>
           <label class="w-full aspect-[4/3] rounded-xl bg-surface-container-low border-2 border-dashed border-outline-variant flex flex-col items-center justify-center p-6 text-center group cursor-pointer hover:bg-surface-container transition-all" for="query_image">
             <span class="material-symbols-outlined text-4xl text-outline mb-2 group-hover:scale-110 transition-transform">add_a_photo</span>
-            <p class="text-sm font-semibold text-on-surface">Upload Room Photo</p>
+            <p class="text-sm font-semibold text-on-surface">Upload Furniture Photo</p>
             <p class="text-[11px] text-on-surface-variant mt-1 uppercase tracking-tighter">JPG, PNG up to 10MB</p>
           </label>
           <input class="hidden" id="query_image" name="query_image" accept=".jpg,.jpeg,.png,.bmp,.tif,.tiff,.webp" type="file" required />
@@ -156,7 +156,7 @@
         </div>
 
         <button id="generate-button" class="w-full flex items-center justify-center gap-2 px-6 py-2 rounded-full bg-gradient-to-br from-primary to-primary-container text-white font-bold text-sm tracking-tight shadow-lg shadow-blue-500/20 hover:scale-[1.01] active:scale-95 transition-all" type="submit">
-          <span>Generate</span>
+          <span>Search</span>
           <span class="material-symbols-outlined text-lg">bolt</span>
         </button>
       </form>
