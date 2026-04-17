@@ -15,12 +15,12 @@ def extract_hsv_histogram(image, bins=(8, 8, 8), normalize=True, use_mask=True):
     if any(b <= 0 for b in bins):
         raise ValueError("All bin values must be positive")
 
-    # ✅ Convert to HSV
+    # Convert to HSV
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
     mask = None
     if use_mask:
-        # ✅ Better masking (combine HSV + grayscale idea)
+        # Masking (combine HSV + grayscale idea)
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
         # remove bright background
@@ -55,7 +55,6 @@ def extract_color_feature(image_path, size=(256, 256), bins=(8, 8, 8), normalize
     return extract_hsv_histogram(image, bins=bins, normalize=normalize)
 
 
-# 🚀 OPTIONAL (FOR UI / PRESENTATION)
 def visualize_histogram(hist, bins=(8, 8, 8)):
     """Simple visualization helper (flattened histogram)."""
     import matplotlib.pyplot as plt
@@ -67,7 +66,6 @@ def visualize_histogram(hist, bins=(8, 8, 8)):
     plt.show()
 
 
-# 🚀 TEST
 if __name__ == "__main__":
     sample_path = "Query/sample.jpg"
 

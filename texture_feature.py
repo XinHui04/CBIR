@@ -28,7 +28,7 @@ def _compute_lbp(gray_image):
     return lbp
 
 
-# 🚀 NEW: Uniform pattern mapping
+# Uniform pattern mapping
 def _get_uniform_lbp_mapping():
     """Create mapping for uniform LBP (59 bins)."""
     mapping = np.zeros(256, dtype=np.uint8)
@@ -56,15 +56,15 @@ def extract_lbp_feature(image, normalize=True, use_uniform=True):
     if image is None:
         raise ValueError("Input image is None")
 
-    # ✅ Convert to grayscale
+    # Convert to grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    # 🚀 Noise reduction (important)
+    # Noise reduction
     gray = cv2.GaussianBlur(gray, (3, 3), 0)
 
     lbp = _compute_lbp(gray)
 
-    # 🚀 Apply uniform mapping
+    # Apply uniform mapping
     if use_uniform:
         lbp = UNIFORM_MAPPING[lbp]
         bins = 59
@@ -74,7 +74,7 @@ def extract_lbp_feature(image, normalize=True, use_uniform=True):
     hist, _ = np.histogram(lbp.ravel(), bins=bins, range=(0, bins))
     hist = hist.astype(np.float32)
 
-    # ✅ L2 normalization (better for CBIR)
+    # L2 normalization
     if normalize:
         norm = np.linalg.norm(hist)
         if norm > 0:
@@ -89,7 +89,6 @@ def extract_texture_feature(image_path, size=(256, 256), normalize=True):
     return extract_lbp_feature(image, normalize=normalize)
 
 
-# 🚀 OPTIONAL (FOR UI)
 def visualize_lbp(image_path):
     image = preprocess_image(image_path)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -100,7 +99,6 @@ def visualize_lbp(image_path):
     cv2.destroyAllWindows()
 
 
-# 🚀 TEST
 if __name__ == "__main__":
     sample_path = "Query/sample.jpg"
 

@@ -10,21 +10,21 @@ def extract_hu_moments(image, apply_log_transform=True, use_largest_contour=True
     if image is None:
         raise ValueError("Input image is None")
 
-    # ✅ Convert to grayscale
+    # Convert to grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    # 🚀 Improve thresholding (reduce noise)
+    # Improve thresholding (reduce noise)
     blur = cv2.GaussianBlur(gray, (5, 5), 0)
 
     _, binary = cv2.threshold(
         blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
     )
 
-    # 🚀 Morphological cleanup (VERY IMPORTANT)
+    # Morphological cleanup
     kernel = np.ones((3, 3), np.uint8)
     binary = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel, iterations=2)
 
-    # 🚀 Focus on main object only
+    # Focus on main object only
     if use_largest_contour:
         contours, _ = cv2.findContours(
             binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
@@ -38,15 +38,15 @@ def extract_hu_moments(image, apply_log_transform=True, use_largest_contour=True
 
             binary = mask  # replace with clean object mask
 
-    # ✅ Compute moments
+    # Compute moments
     moments = cv2.moments(binary)
     hu = cv2.HuMoments(moments).flatten().astype(np.float32)
 
-    # ✅ Log transform (you already did correctly ✔)
+    # Log transform
     if apply_log_transform:
         hu = -np.sign(hu) * np.log10(np.abs(hu) + 1e-12)
 
-    # 🚀 Normalize (important when combining features)
+    # Normalize
     norm = np.linalg.norm(hu)
     if norm > 0:
         hu /= norm
@@ -60,7 +60,7 @@ def extract_shape_feature(image_path, size=(256, 256), apply_log_transform=True)
     return extract_hu_moments(image, apply_log_transform=apply_log_transform)
 
 
-# 🚀 OPTIONAL (FOR UI / DEBUG)
+# (FOR UI / DEBUG)
 def visualize_binary(image_path):
     image = preprocess_image(image_path)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -71,7 +71,7 @@ def visualize_binary(image_path):
     cv2.destroyAllWindows()
 
 
-# 🚀 TEST
+# TEST
 if __name__ == "__main__":
     sample_path = "Query/sample.jpg"
 

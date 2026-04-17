@@ -26,7 +26,7 @@ def list_images(dataset_dir, excluded_categories=None):
         if not path.is_file() or path.suffix.lower() not in IMAGE_EXTENSIONS:
             continue
 
-        # Skip excluded class folders (for example, human_being).
+        # Skip excluded class folders
         if path.parent.name.strip().lower() in normalized_excluded:
             continue
 
