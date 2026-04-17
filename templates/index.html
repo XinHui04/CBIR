@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Content-Based Image Retrieval</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
   <script>
@@ -205,6 +206,57 @@
           </section>
         {% endif %}
 
+        {% if results %}
+          <section class="bg-surface-container-lowest p-4 rounded-xl shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-semibold text-on-surface">Top-K Result Analytics</h3>
+              <div class="flex items-center gap-3">
+                {% if results[0].is_cosine %}
+                  <span class="text-xs text-on-surface-variant">Y-axis: Cosine similarity</span>
+                {% else %}
+                  <span class="text-xs text-on-surface-variant">Y-axis: Euclidean distance</span>
+                {% endif %}
+                <button
+                  id="chart-collapse-btn"
+                  type="button"
+                  class="w-8 h-8 rounded-full bg-surface-container text-on-surface font-bold text-sm hover:bg-surface-container-high transition-colors"
+                  aria-expanded="true"
+                  aria-controls="chart-analytics-content"
+                  title="Hide charts"
+                >^</button>
+              </div>
+            </div>
+            <div id="chart-analytics-content">
+              <div class="flex flex-wrap gap-2 mb-4" id="chart-view-toggle" role="group" aria-label="Chart View Toggle">
+                <button type="button" class="chart-toggle-btn px-3 py-1.5 rounded-full text-xs font-semibold bg-primary text-white" data-view="all">All Charts</button>
+                <button type="button" class="chart-toggle-btn px-3 py-1.5 rounded-full text-xs font-semibold bg-surface-container text-on-surface hover:bg-surface-container-high" data-view="bar">Bar</button>
+                <button type="button" class="chart-toggle-btn px-3 py-1.5 rounded-full text-xs font-semibold bg-surface-container text-on-surface hover:bg-surface-container-high" data-view="pie">Pie</button>
+                <button type="button" class="chart-toggle-btn px-3 py-1.5 rounded-full text-xs font-semibold bg-surface-container text-on-surface hover:bg-surface-container-high" data-view="line">Line</button>
+              </div>
+              <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+                <div class="bg-surface-container-low p-3 rounded-lg" data-chart-panel="bar">
+                  <p class="text-xs font-semibold text-on-surface-variant mb-2">Bar Chart by Rank</p>
+                  <div class="h-64">
+                    <canvas id="topk-bar-chart"></canvas>
+                  </div>
+                </div>
+                <div class="bg-surface-container-low p-3 rounded-lg" data-chart-panel="pie">
+                  <p class="text-xs font-semibold text-on-surface-variant mb-2">Category Distribution (Top-K)</p>
+                  <div class="h-64">
+                    <canvas id="topk-pie-chart"></canvas>
+                  </div>
+                </div>
+                <div class="bg-surface-container-low p-3 rounded-lg" data-chart-panel="line">
+                  <p class="text-xs font-semibold text-on-surface-variant mb-2">Score Trend by Rank</p>
+                  <div class="h-64">
+                    <canvas id="topk-line-chart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        {% endif %}
+
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {% for item in results %}
             <div class="group bg-surface-container-lowest p-3 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 flex flex-col">
@@ -245,6 +297,16 @@ const selectedFileWrap = document.getElementById("selected-file-wrap");
 const selectedFilePreview = document.getElementById("selected-file-preview");
 const selectedFileName = document.getElementById("selected-file-name");
 const generateButton = document.getElementById("generate-button");
+const chartToggleWrap = document.getElementById("chart-view-toggle");
+const chartToggleButtons = Array.from(document.querySelectorAll(".chart-toggle-btn"));
+const chartPanels = Array.from(document.querySelectorAll("[data-chart-panel]"));
+const chartCollapseBtn = document.getElementById("chart-collapse-btn");
+const chartAnalyticsContent = document.getElementById("chart-analytics-content");
+
+const chartLabels = {{ results | map(attribute='label') | list | tojson }};
+const chartRanks = {{ results | map(attribute='rank') | list | tojson }};
+const chartScores = {{ results | map(attribute='score') | list | tojson }};
+const chartIsCosine = {{ (results and results[0].is_cosine) | tojson }};
 
 uploadInput.addEventListener("change", () => {
   const selectedFile = uploadInput.files && uploadInput.files[0];
@@ -275,4 +337,265 @@ searchForm.addEventListener("submit", async (event) => {
 
   searchForm.submit();
 });
+
+function setChartView(view) {
+  chartPanels.forEach((panel) => {
+    const panelView = panel.getAttribute("data-chart-panel");
+    const shouldShow = view === "all" || panelView === view;
+    panel.classList.toggle("hidden", !shouldShow);
+  });
+
+  chartToggleButtons.forEach((btn) => {
+    const active = btn.getAttribute("data-view") === view;
+    btn.classList.toggle("bg-primary", active);
+    btn.classList.toggle("text-white", active);
+    btn.classList.toggle("bg-surface-container", !active);
+    btn.classList.toggle("text-on-surface", !active);
+  });
+}
+
+if (chartToggleWrap && chartToggleButtons.length > 0 && chartPanels.length > 0) {
+  chartToggleWrap.addEventListener("click", (event) => {
+    const target = event.target.closest(".chart-toggle-btn");
+    if (!target) {
+      return;
+    }
+    const view = target.getAttribute("data-view") || "all";
+    setChartView(view);
+  });
+
+  if (window.matchMedia && window.matchMedia("(max-width: 1024px)").matches) {
+    setChartView("bar");
+  } else {
+    setChartView("all");
+  }
+}
+
+if (chartCollapseBtn && chartAnalyticsContent) {
+  chartCollapseBtn.addEventListener("click", () => {
+    const isHidden = chartAnalyticsContent.classList.toggle("hidden");
+    chartCollapseBtn.textContent = isHidden ? "v" : "^";
+    chartCollapseBtn.setAttribute("aria-expanded", String(!isHidden));
+    chartCollapseBtn.setAttribute("title", isHidden ? "Show charts" : "Hide charts");
+  });
+}
+
+if (window.Chart && Array.isArray(chartScores) && chartScores.length > 0) {
+  const combinedLabels = chartLabels.map((label, index) => `#${chartRanks[index]} ${label}`);
+  const metricLabel = chartIsCosine ? "Cosine Similarity" : "Euclidean Distance";
+  const metricLabelLower = chartIsCosine ? "Cosine similarity" : "Euclidean distance";
+
+  const palette = [
+    "#2563eb",
+    "#0ea5e9",
+    "#0891b2",
+    "#0f766e",
+    "#65a30d",
+    "#ca8a04",
+    "#f97316",
+    "#dc2626",
+    "#9333ea",
+    "#db2777",
+  ];
+
+  const categoryCountsMap = chartLabels.reduce((acc, label) => {
+    acc[label] = (acc[label] || 0) + 1;
+    return acc;
+  }, {});
+  const pieLabels = Object.keys(categoryCountsMap);
+  const pieValues = Object.values(categoryCountsMap);
+
+  const chartCanvas = document.getElementById("topk-bar-chart");
+  if (chartCanvas) {
+    new Chart(chartCanvas, {
+      type: "bar",
+      data: {
+        labels: combinedLabels,
+        datasets: [
+          {
+            label: metricLabel,
+            data: chartScores,
+            borderRadius: 8,
+            backgroundColor: chartIsCosine
+              ? "rgba(37, 99, 235, 0.70)"
+              : "rgba(0, 116, 166, 0.70)",
+            borderColor: chartIsCosine
+              ? "rgba(37, 99, 235, 1)"
+              : "rgba(0, 116, 166, 1)",
+            borderWidth: 1.5,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+            labels: {
+              color: "#434655",
+              font: {
+                family: "Inter",
+                size: 12,
+                weight: "600",
+              },
+            },
+          },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                return `${metricLabelLower}: ${Number(ctx.parsed.y).toFixed(6)}`;
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: "#434655",
+              font: {
+                family: "Inter",
+                size: 11,
+              },
+              maxRotation: 30,
+              minRotation: 20,
+            },
+            grid: {
+              color: "rgba(115, 118, 134, 0.10)",
+            },
+          },
+          y: {
+            ticks: {
+              color: "#434655",
+              font: {
+                family: "Inter",
+                size: 11,
+              },
+            },
+            grid: {
+              color: "rgba(115, 118, 134, 0.15)",
+            },
+            beginAtZero: !chartIsCosine,
+          },
+        },
+      },
+    });
+  }
+
+  const pieCanvas = document.getElementById("topk-pie-chart");
+  if (pieCanvas) {
+    new Chart(pieCanvas, {
+      type: "pie",
+      data: {
+        labels: pieLabels,
+        datasets: [
+          {
+            data: pieValues,
+            backgroundColor: pieLabels.map((_, index) => palette[index % palette.length]),
+            borderColor: "#f7f9fb",
+            borderWidth: 2,
+            hoverOffset: 8,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: "bottom",
+            labels: {
+              color: "#434655",
+              font: {
+                family: "Inter",
+                size: 11,
+                weight: "600",
+              },
+              boxWidth: 12,
+              padding: 12,
+            },
+          },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `${ctx.label}: ${ctx.parsed} image(s)`,
+            },
+          },
+        },
+      },
+    });
+  }
+
+  const lineCanvas = document.getElementById("topk-line-chart");
+  if (lineCanvas) {
+    new Chart(lineCanvas, {
+      type: "line",
+      data: {
+        labels: chartRanks.map((rank) => `#${rank}`),
+        datasets: [
+          {
+            label: `${metricLabel} Trend`,
+            data: chartScores,
+            fill: false,
+            tension: 0.35,
+            borderWidth: 2.5,
+            borderColor: chartIsCosine ? "rgba(37, 99, 235, 1)" : "rgba(0, 116, 166, 1)",
+            backgroundColor: chartIsCosine ? "rgba(37, 99, 235, 0.25)" : "rgba(0, 116, 166, 0.25)",
+            pointRadius: 3,
+            pointHoverRadius: 5,
+            pointBackgroundColor: "#ffffff",
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+            labels: {
+              color: "#434655",
+              font: {
+                family: "Inter",
+                size: 12,
+                weight: "600",
+              },
+            },
+          },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `${metricLabelLower}: ${Number(ctx.parsed.y).toFixed(6)}`,
+            },
+          },
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: "#434655",
+              font: {
+                family: "Inter",
+                size: 11,
+              },
+            },
+            grid: {
+              color: "rgba(115, 118, 134, 0.10)",
+            },
+          },
+          y: {
+            ticks: {
+              color: "#434655",
+              font: {
+                family: "Inter",
+                size: 11,
+              },
+            },
+            grid: {
+              color: "rgba(115, 118, 134, 0.15)",
+            },
+            beginAtZero: !chartIsCosine,
+          },
+        },
+      },
+    });
+  }
+}
 </script>
