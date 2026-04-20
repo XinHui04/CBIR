@@ -4,6 +4,8 @@ A Flask-based content-based image retrieval (CBIR) project for a nursing-home ob
 ## Dataset used
 https://data.mendeley.com/datasets/fpctx3svzd/1
 
+Note: The `Dataset/` folder is not included in this GitHub repository or project submission due to size/distribution constraints. Download it separately from the link above during setup.
+
 ## Features
 
 - Flask web interface for uploading a query image
@@ -59,8 +61,10 @@ pip install -r requirements.txt
 1. Clone or open the project folder.
 2. Create and activate a virtual environment.
 3. Install the dependencies.
-4. Build the feature database.
-5. Run the Flask app.
+4. Download the dataset from: https://data.mendeley.com/datasets/fpctx3svzd/1
+5. Extract and place the dataset so this path exists: `Dataset/MYNursingHome/`
+6. Build the feature database.
+7. Run the Flask app.
 
 ### Windows
 
@@ -69,6 +73,8 @@ python -m venv .venv
 .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ```
+
+After installing dependencies, download and extract the dataset into `Dataset/MYNursingHome/` before running feature database generation.
 
 ## Build the Feature Database
 
